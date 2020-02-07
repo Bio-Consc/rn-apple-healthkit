@@ -27,8 +27,10 @@ declare module "rn-apple-healthkit" {
         getMindfulSession(options: MindfulSessionData, callback: (err: string, results: HealthValue) => void): void;
 
         getStepCount(options: any, callback: (err: string, results: HealthValue) => void): void;
+        
+        saveHeight(options: any, callback: (err: string, results: Object) => void): void
 
-	saveBloodGlucose(options: Object, callback: (error: string, result: Object) => void): void;
+	    saveBloodGlucose(options: Object, callback: (error: string, result: Object) => void): void;
     }
 
     export interface HealthDateOfBirth {
