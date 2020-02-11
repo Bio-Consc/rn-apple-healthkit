@@ -19,7 +19,7 @@ declare module 'rn-apple-healthkit' {
 
     authorizationStatusForType(
       type: string
-    ): Promise<HealthKitAuthorizationStatus>;
+    ): Promise<string>;
 
     saveFood(
       options: Object,
