@@ -40,12 +40,11 @@
 
 - (void)results_saveBloodGlucoseSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
-//    NSDate *date = [RCTAppleHealthKit dateFromOptions:input key:@"date" withDefault:[NSDate date]];
-//    double value = [RCTAppleHealthKit doubleFromOptions:input key:@"value" withDefault:(double)0];
+    double timestamp = [RCTAppleHealthKit doubleFromOptions:input key:@"timestamp" withDefault:(double)0];
+    double value = [RCTAppleHealthKit doubleFromOptions:input key:@"value" withDefault:(double)0];
     
-    NSDate *date = [NSDate init];
-    double value = 120;
-    
+    NSDate *date = [NSDate dateWithTimeIntervalSince1970:timestamp];
+   
     HKUnit *unit = [[HKUnit gramUnitWithMetricPrefix:HKMetricPrefixMilli] unitDividedByUnit:[HKUnit literUnitWithMetricPrefix:HKMetricPrefixDeci]];
     
     HKQuantity *sample =[HKQuantity quantityWithUnit:unit doubleValue:value];
