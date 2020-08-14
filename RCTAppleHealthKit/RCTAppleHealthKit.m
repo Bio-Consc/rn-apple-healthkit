@@ -365,7 +365,6 @@ RCT_EXPORT_METHOD(setObserverForType:(NSDictionary *)input callback:(RCTResponse
                 [data addObject:elem];
             }
             
-            NSLog(@"Number of items: %lu of type: %@", data.count, type.description);
             
             if (data.count > 0) {
                 NSDictionary *message = @{
