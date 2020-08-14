@@ -24,7 +24,8 @@
 + (NSDate *)endDateFromOptions:(NSDictionary *)options;
 + (NSDate *)endDateFromOptionsDefaultNow:(NSDictionary *)options;
 + (HKSampleType *)hkQuantityTypeFromString:(NSString *)type;
-
++ (HKUnit *)hkUnitFromHKQuantityType:(NSString *)type;
++ (NSString *)stringFromHKQuantityType:(HKObjectType *)type;
 + (HKUnit *)hkUnitFromOptions:(NSDictionary *)options key:(NSString *)key withDefault:(HKUnit *)defaultValue;
 + (NSUInteger)uintFromOptions:(NSDictionary *)options key:(NSString *)key withDefault:(NSUInteger)defaultValue;
 + (double)doubleFromOptions:(NSDictionary *)options key:(NSString *)key withDefault:(double)defaultValue;
