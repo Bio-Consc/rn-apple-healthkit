@@ -19,6 +19,7 @@
 #import "RCTAppleHealthKit+Methods_Results.h"
 #import "RCTAppleHealthKit+Methods_Sleep.h"
 #import "RCTAppleHealthKit+Methods_Mindfulness.h"
+#import "RCTAppleHealthKit+Utils.h"
 
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventDispatcher.h>
@@ -134,11 +135,20 @@ RCT_EXPORT_METHOD(getSamples:(NSDictionary *)input callback:(RCTResponseSenderBl
     [self fitness_getSamples:input callback:callback];
 }
 
-RCT_EXPORT_METHOD(setObserver:(NSDictionary *)input)
+RCT_EXPORT_METHOD(setObserverForSampleType:(NSDictionary *)input)
 {
-    [self fitness_setObserver:input];
+    [self observer_setObserverForSampleType:input];
 }
 
+RCT_EXPORT_METHOD(disableObserverationForSampleType:(NSDictionary *)input)
+{
+    [self observer_disableObservationForType:input];
+}
+
+RCT_EXPORT_METHOD(disableAllObservations)
+{
+    [self observer_disableAll];
+}
 
 RCT_EXPORT_METHOD(getDailyStepCountSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
@@ -274,6 +284,116 @@ RCT_EXPORT_METHOD(getMindfulSession:(NSDictionary *)input callback:(RCTResponseS
     }
     callback(@[[NSNull null], @(isAvailable)]);
 }
+
+RCT_EXPORT_METHOD(setObserverForType:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self setObserverForType:input callback:callback];
+}
+
+- (void)observer_disableObservationForType: (NSDictionary *)input
+{
+    NSString *type = [RCTAppleHealthKit stringFromOptions:input key:@"type" withDefault:@""];
+    if ([type isEqualToString: @""]) {
+        return;
+    }
+    
+    HKSampleType *sampleType = [RCTAppleHealthKit hkQuantityTypeFromString:type];
+    
+    [self.healthStore disableBackgroundDeliveryForType:sampleType withCompletion:^(BOOL success, NSError * _Nullable error) {
+        if (error) {
+            NSLog(@"*** Failure to disable observation for type %@: %@ ***", type, error.description);
+            return;
+        }
+    }];
+}
+
+- (void)observer_disableAll
+{
+    [self.healthStore disableAllBackgroundDeliveryWithCompletion:^(BOOL success, NSError * _Nullable error) {
+        if (error) {
+            NSLog(@"*** Failure to disable observations: %@ ***", error.description);
+            return;
+        }
+    }];
+}
+
+- (void)observer_setObserverForSampleType:(NSDictionary *)input
+{
+    double period = [RCTAppleHealthKit doubleFromOptions:input key:@"period" withDefault:(double)86400];
+    NSString *type = [RCTAppleHealthKit stringFromOptions:input key:@"type" withDefault:@"walking"];
+    
+    HKSampleType *sampleType = [RCTAppleHealthKit hkQuantityTypeFromString:type];
+    HKUnit *unit = [RCTAppleHealthKit hkUnitFromHKQuantityType:type];
+    
+    [self setObserverForType:sampleType unit:unit period:period];
+}
+
+- (void)setObserverForType:(HKSampleType *)type
+                      unit:(HKUnit *)unit
+                    period: (double)period {
+    
+    HKObserverQuery *query = [[HKObserverQuery alloc] initWithSampleType:type predicate:nil updateHandler:^(HKObserverQuery *query, HKObserverQueryCompletionHandler completionHandler, NSError * _Nullable error) {
+        if (error) {
+            NSLog(@"*** An error occurred while reading %@: %@ ***", type.description, error.localizedDescription);
+            completionHandler();
+            return;
+        }
+        
+        NSUInteger limit = HKObjectQueryNoLimit;
+        NSDate *startQuery = [NSDate dateWithTimeIntervalSinceNow:-period];
+        NSDate *endQuery = [NSDate date];
+        NSPredicate *predicate = [HKQuery predicateForSamplesWithStartDate:startQuery endDate:endQuery options:HKQueryOptionNone];
+        
+        HKSampleQuery *sampleQuery = [[HKSampleQuery alloc] initWithSampleType:type predicate:predicate limit:limit sortDescriptors:false resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error) {
+            
+            NSMutableArray *data = [NSMutableArray arrayWithCapacity:1];
+            
+            for (HKQuantitySample *sample in results) {
+                NSString *valueType = unit.description;
+                HKQuantity *quantity = sample.quantity;
+                double value = [quantity doubleValueForUnit:unit];
+                
+                double startDate = [sample.startDate timeIntervalSince1970];
+                double endDate = [sample.endDate timeIntervalSince1970];
+                
+                NSDictionary *elem = @{
+                @"value" : @(value),
+                @"startDate": @(startDate),
+                @"endDate": @(endDate),
+                };
+                
+                [data addObject:elem];
+            }
+            
+            NSLog(@"Number of items: %lu of type: %@", data.count, type.description);
+            
+            if (data.count > 0) {
+                NSDictionary *message = @{
+                    @"type": [RCTAppleHealthKit stringFromHKQuantityType: type],
+                    @"data": data,
+                };
+                
+                NSData *jsonData = [NSJSONSerialization dataWithJSONObject:message options:NSJSONWritingPrettyPrinted error:&error];
+                NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+                
+                [self.bridge.eventDispatcher sendAppEventWithName:@"observer" body:jsonString];
+            }
+            completionHandler();
+        }];
+        
+        [self.healthStore executeQuery:sampleQuery];
+    }];
+    
+    [self.healthStore executeQuery:query];
+    
+    [self.healthStore enableBackgroundDeliveryForType:type frequency:HKUpdateFrequencyImmediate withCompletion:^(BOOL success, NSError * _Nullable error) {
+        if (error) {
+            NSLog(@"*** An error occurred with background delivery for type %@: %@ ***", type.description, error.localizedDescription);
+            return;
+        }
+    }];
+}
+
 
 
 - (void)initializeHealthKit:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
