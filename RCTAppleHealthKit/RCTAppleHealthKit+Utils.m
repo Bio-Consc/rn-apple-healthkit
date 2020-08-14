@@ -125,19 +125,83 @@
 }
 
 + (HKSampleType *)hkQuantityTypeFromString:(NSString *)type {
+    
     if ([type isEqual:@"Walking"]) {
         return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
     } else if ([type isEqual:@"StairClimbing"]) {
         return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierFlightsClimbed];
     } else if ([type isEqual:@"Running"]){
+        // leaving this here to prevent breaking any pre-existing methods in this library
+        return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceWalkingRunning];
+    } else if ([type isEqualToString:@"DistanceWalkingRunning"]) {
         return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceWalkingRunning];
     } else if ([type isEqual:@"Cycling"]){
         return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceCycling];
     } else if ([type isEqual:@"Swimming"]){
         return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceSwimming];
+    } else if ([type isEqual:@"HeartRate"]) {
+        return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeartRate];
+    } else if ([type isEqual:@"Height"]) {
+        return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight];
+    } else if ([type isEqual:@"Weight"]) {
+        return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass];
+    } else if ([type isEqual:@"HeartRateVariability"]) {
+        if (@available(iOS 11.0, *)) {
+            return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeartRateVariabilitySDNN];
+        }
     }
     // default [type isEqual:@"Workout"])
     return [HKObjectType workoutType];
+}
+
++ (NSString *)stringFromHKQuantityType:(HKObjectType *)type {
+    if ([type.description isEqualToString:@"HKQuantityTypeIdentifierStepCount"]) {
+        return @"Walking";
+    } else if ([type.description isEqualToString:@"HKQuantityTypeIdentifierFlightsClimbed"]) {
+        return @"StairClimbing";
+    } else if ([type.description isEqualToString:@"HKQuantityTypeIdentifierDistanceWalkingRunning"]) {
+        return @"Running";
+    } else if ([type.description isEqualToString:@"HKQuantityTypeIdentifierDistanceCycling"]) {
+        return @"Cycling";
+    } else if ([type.description isEqualToString:@"HKQuantityTypeIdentifierDistanceSwimming"]) {
+        return @"Swimming";
+    } else if ([type.description isEqualToString:@"HKQuantityTypeIdentifierHeartRate"]) {
+        return @"HeartRate";
+    } else if ([type.description isEqualToString:@"HKQuantityTypeIdentifierHeight"]) {
+        return @"Height";
+    } else if ([type.description isEqualToString:@"HKQuantityTypeIdentifierBodyMass"]) {
+        return @"Weight";
+    } else if ([type.description isEqualToString:@"HKQuantityTypeIdentifierHeartRateVariabilitySDNN"]) {
+        return @"HeartRateVariability";
+    }
+    
+    return @"Workout";
+}
+
++ (HKUnit *)hkUnitFromHKQuantityType:(NSString *)type {
+    if ([type isEqual:@"Walking"]) {
+        return [HKUnit meterUnit];
+    } else if ([type isEqual:@"DistanceWalkingRunning"]) {
+        return [HKUnit meterUnit];
+    } else if ([type isEqual:@"StairClimbing"]) {
+        return [HKUnit countUnit];
+    } else if ([type isEqual:@"Running"]) {
+        return [HKUnit meterUnit];
+    } else if ([type isEqual:@"Cycling"]) {
+        return [HKUnit meterUnit];
+    } else if ([type isEqual:@"Swimming"]) {
+        return [HKUnit meterUnit];
+    } else if ([type isEqual:@"HeartRate"]) {
+        return [[HKUnit countUnit] unitDividedByUnit: [HKUnit minuteUnit]];
+    } else if ([type isEqual:@"HeartRateVariability"]) {
+        return [HKUnit secondUnitWithMetricPrefix:HKMetricPrefixMilli];
+    } else if ([type isEqualToString:@"Height"]) {
+        return [HKUnit meterUnitWithMetricPrefix:HKMetricPrefixCenti];
+    } else if ([type isEqualToString:@"Weight"]) {
+        return [HKUnit gramUnitWithMetricPrefix:HKMetricPrefixKilo];
+    }
+    
+    return [HKUnit minuteUnit];
 }
 
 
