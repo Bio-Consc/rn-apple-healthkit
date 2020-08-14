@@ -256,6 +256,11 @@ RCT_EXPORT_METHOD(saveBloodGlucoseSample:(NSDictionary *)input
     [self results_saveBloodGlucoseSample:input callback:callback];
 }
 
+RCT_EXPORT_METHOD(saveBloodGlucoseSamples:(NSArray *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self results_saveBloodGlucoseSamples:input callback:callback];
+}
+
 RCT_EXPORT_METHOD(getSleepSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self sleep_getSleepSamples:input callback:callback];
@@ -364,7 +369,6 @@ RCT_EXPORT_METHOD(setObserverForType:(NSDictionary *)input callback:(RCTResponse
                 
                 [data addObject:elem];
             }
-            
             
             if (data.count > 0) {
                 NSDictionary *message = @{

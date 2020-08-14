@@ -7,4 +7,7 @@
 - (void)results_saveBloodGlucoseSample:(NSDictionary *)input
                                callback:(RCTResponseSenderBlock)callback;
 
+- (void)results_saveBloodGlucoseSamples:(NSArray *)input
+                               callback:(RCTResponseSenderBlock)callback;
+
 @end

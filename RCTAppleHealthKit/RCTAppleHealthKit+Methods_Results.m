@@ -38,6 +38,32 @@
     }];
 }
 
+- (void)results_saveBloodGlucoseSamples:(NSArray *)input callback:(RCTResponseSenderBlock)callback
+{
+    for (NSDictionary *point in input) {
+        double timestamp = [RCTAppleHealthKit doubleFromOptions:point key:@"timestamp" withDefault:(double)0];
+        double value = [RCTAppleHealthKit doubleFromOptions:point key:@"value" withDefault:(double)0];
+        
+        NSDate *date = [NSDate dateWithTimeIntervalSince1970:timestamp];
+        
+        HKUnit *unit = [[HKUnit gramUnitWithMetricPrefix:HKMetricPrefixMilli] unitDividedByUnit:[HKUnit literUnitWithMetricPrefix:HKMetricPrefixDeci]];
+        
+        HKQuantity *sample = [HKQuantity quantityWithUnit:unit doubleValue:value];
+        
+        HKQuantitySample *glucoseSample = [HKQuantitySample quantitySampleWithType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBloodGlucose] quantity:sample startDate:date endDate:date];
+        
+        [self.healthStore saveObject: glucoseSample withCompletion:^(BOOL success, NSError *error) {
+            if (!success) {
+                NSLog(@"An error occured save the blood glucose sample: %@", error);
+                callback(@[RCTMakeError(@"error saving blood glucose sample", error, nil)]);
+                return;
+            }
+        }];
+    }
+    
+    callback(@[[NSNull null], @true]);
+}
+
 - (void)results_saveBloodGlucoseSample:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
     double timestamp = [RCTAppleHealthKit doubleFromOptions:input key:@"timestamp" withDefault:(double)0];
@@ -47,7 +73,7 @@
    
     HKUnit *unit = [[HKUnit gramUnitWithMetricPrefix:HKMetricPrefixMilli] unitDividedByUnit:[HKUnit literUnitWithMetricPrefix:HKMetricPrefixDeci]];
     
-    HKQuantity *sample =[HKQuantity quantityWithUnit:unit doubleValue:value];
+    HKQuantity *sample = [HKQuantity quantityWithUnit:unit doubleValue:value];
     
     HKQuantitySample *glucoseSample = [HKQuantitySample quantitySampleWithType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBloodGlucose] quantity:sample startDate:date endDate:date];
     
