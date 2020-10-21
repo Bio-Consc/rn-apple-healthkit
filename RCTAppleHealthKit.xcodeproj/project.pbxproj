@@ -139,7 +139,6 @@
 				AD8403CE6AF2AAD2D7CEE97E /* Pods-RCTAppleHealthKit.debug.xcconfig */,
 				5ED55FED5925473BC28AF03D /* Pods-RCTAppleHealthKit.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};

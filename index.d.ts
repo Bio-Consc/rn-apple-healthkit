@@ -11,15 +11,16 @@ declare module 'rn-apple-healthkit' {
     limit?: number;
   }
 
+  export interface ObserverOptions {
+    type?: string;
+    period?: number;
+  }
+
   export interface AppleHealthKit {
     initHealthKit(
       permissions: HealthKitPermissions,
       callback: (error: string, result: Object) => void
     ): void;
-
-    authorizationStatusForType(
-      type: string
-    ): Promise<string>;
 
     saveFood(
       options: Object,
@@ -58,10 +59,28 @@ declare module 'rn-apple-healthkit' {
       callback: (err: string, results: Object) => void
     ): void;
 
-    saveBloodGlucoseSample(
-      options: any,
+    saveBloodGlucose(
+      options: Object,
       callback: (error: string, result: Object) => void
     ): void;
+
+    saveBloodGlucoseSample(
+      sample: any,
+      callback: (error: string, result: Object) => void
+    ): void;
+
+    saveBloodGlucoseSamples(
+      samples: any,
+      callback: (error: string, result: Object) => void
+    ): void;
+
+    setObserverForSampleType(options: ObserverOptions): void;
+
+    disableObservationForSampleType(options: { type: string }): void;
+
+    disableAllObservations(): void;
+
+    authorizationStatusForType(type: string): string;
   }
 
   export interface HealthDateOfBirth {

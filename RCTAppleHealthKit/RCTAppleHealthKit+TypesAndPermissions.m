@@ -78,6 +78,10 @@
         return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBloodPressureDiastolic];
     }else if ([@"RespiratoryRate" isEqualToString: key]) {
         return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierRespiratoryRate];
+    }else if ([@"HeartRateVariability" isEqualToString:key]) {
+        if (@available(iOS 11.0, *)) {
+            return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeartRateVariabilitySDNN];
+        }
     }
     
     // Results Identifiers
@@ -217,6 +221,16 @@
     // Results Identifiers
     if ([@"BloodGlucose" isEqualToString: key]) {
         return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBloodGlucose];
+    }
+    
+    if ([@"HeartRate" isEqualToString:key]) {
+        return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeartRate];
+    }
+    
+    if (@available(iOS 11.0, *)) {
+        if ([@"HeartRateVariability" isEqualToString:key]) {
+            return [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeartRateVariabilitySDNN];
+        }
     }
     
     // Sleep
